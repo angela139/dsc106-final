@@ -84,6 +84,10 @@ const updateChart = async(data) => {
     .range([height, 0])
     .domain([0, d3.max(data, d => d.value)]);
 
+  const tooltip = d3.select("#bar-chart").append("div")
+    .attr("class", "tooltip")
+    .attr('style', 'position: absolute; opacity: 0; background-color: white; color: black; padding: 2px; border: 1px solid black;')
+
   svg.selectAll(".bar")
     .data(data)
     .enter().append("rect")
@@ -92,7 +96,23 @@ const updateChart = async(data) => {
     .attr("width", x.bandwidth())
     .attr("y", d => y(d.value))
     .attr("height", d => height - y(d.value))
-    .attr("fill", "steelblue");
+    .attr("fill", "steelblue")
+    .on("mouseover", function(event, d) {
+      tooltip.transition()
+        .duration(200)
+        .style("opacity", 1);
+      tooltip.html(`Type: ${d.most_serious_bias_type}<br>Value: ${d.value}`)
+        .style("left", (event.pageX + 5) + "px")
+        .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mousemove", function(event) {
+      tooltip.style("left", (event.pageX + 5) + "px")
+        .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseout", function() {
+      tooltip.transition()
+        .style("opacity", 0);
+    });
 
   svg.append("g")
     .attr("transform", `translate(0,${height})`)
