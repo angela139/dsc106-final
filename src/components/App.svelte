@@ -1,6 +1,7 @@
 <script>
 import { onMount } from 'svelte';
 import * as d3 from 'd3';
+import { base } from '$app/paths';
 
 let hatecrime_data = [];
 
@@ -45,7 +46,7 @@ const load_data = () => {
   return new Promise((resolve, reject) => {
     const termData = {};
 
-    d3.csv("./src/data/summed_victims_terms.csv").then(fullData => {
+    d3.csv(`${base}/summed_victims_terms.csv`).then(fullData => {
       const termData = fullData.map(d => ({
         most_serious_bias_type: d['most_serious_bias_type'],
         value: parseFloat(d[selectedTerm])  // Make sure selectedTerm corresponds to a column name in CSV
