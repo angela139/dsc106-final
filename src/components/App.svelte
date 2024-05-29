@@ -5,6 +5,7 @@
 
   let hatecrime_data = [];
   let currentSection = 0;
+  let innerWidth;
 
   const terms = [
     "2001-2004: George W. Bush's 1st Term",
@@ -54,7 +55,7 @@
     travel ban from China. Due to the pandemic, he also passed Title 42 which allowed him to keep migrants and \
     asylum seekers on the border from entering the country. \
     \n\tThe Black Lives Matter movement would also have an enormous resurgence in 2020 with the passing of George Floyd. On May 25, 2020, Floyd, a black man, was pinned to death by police officers during an arrest. After the recording of his death was posted to the media, hundreds of protests erupted around the United States to fight against police brutality and racism. As reported by the New York Times, the protests saw a massive turnout, peaking at half a million participants on June 6, 2020 (Buchanan et al, 2020). At the same time we saw counter movements also emerge, with conflicts erupting in violence like with the Kyle Rittenhouse case.',
-    'Blurb for term 6...'
+    '\tDuring the rise of the coronavirus pandemic, Asian Americans faced hate crimes due to the belief that they caused the pandemic, exacerbated by rhetoric from former President Donald Trump who called COVID-19 the “China Virus”. From March 2020 to March 2021, the organization Stop AAPI Hate reported that there were 6,603 hate crimes against Asian Americans, according to NPR. On May 20, 2021, President Biden signed the COVID-19 Hate Crimes Act in response to the rise of Asian American hate, which aimed to make reporting hate crimes easier.\t\n In the present day, the Palestine-Israel conflict has been gaining traction in the United States media, as people are protesting against the war. With such a contested topic, there have been many protests on either side. Unfortunately, there has been a suspected rise in religious hate crimes since the start of the war, with anti-semitic and Islamophobic crimes targeting members on both sides of the conflict.'
   ];
 
   onMount(() => {
@@ -88,8 +89,8 @@
 
   function updateChart(data) {
   const margin = { top: 20, right: 30, bottom: 30, left: 60 };
-  const width = 700;
-  const height = 400;
+  const width = innerWidth*0.4;
+  const height = innerHeight-200;
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
@@ -101,11 +102,27 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
+
+  // var xAxis = d3.svg.axis()
+    // .scale(x);
+
     // Append the g elements for axes only once
     svg.append("g").attr("class", "x-axis")
-       .attr("transform", `translate(0,${height})`);
+       .attr("transform", `translate(0,${height}) `)
+       .selectAll("text")
+        .attr("transform", "rotate(-65)")
 
-    svg.append("g").attr("class", "y-axis");
+
+      //  .attr("transform", "")
+      //  .width('10px')
+      //   .selectAll("text")  
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+      //     .attr("transform", "rotate(-65)" );
+      .style("text-anchor", "end");
+
+    svg.append("g").attr("class", "y-axis")
   }
 
   const x = d3.scaleBand()
@@ -157,25 +174,47 @@
     .remove();
 }
 
+const resizeWindow = () => {
+  innerWidth = window.innerWidth
+  innerHeight = window.innerHeight
+
+  d3.select("#bar-chart")
+    .attr("scale", innerWidth/4000)
+
+    // .attr("height", innerHeight*0.5)
+}
 
 </script>
 
+<svelte:window bind:innerWidth />
+
 <main>
-  <h1>Examining the Link: The Rise of Hate Crimes And Social Justice Movements In San Francisco</h1>
-  <div id="bar-chart" style="position: sticky; top: 10px;"></div>
-  {#each terms as term, i}
-    <section style="min-height: 100vh; padding: 20px;">
-      <h2>{term}</h2>
-      <p>{blurbs[i]}</p>
-    </section>
-  {/each}
+  <div class="left">
+    <div id="bar-chart" style="position: sticky; top: 10px;"></div>
+  </div>
+  <div class="right">
+    <h1>Examining the Link: The Rise of Hate Crimes And Social Justice Movements In San Francisco</h1>
+    {#each terms as term, i}
+      <section style="min-height: 100vh; padding: 20px;">
+        <h2>{term}</h2>
+        <p>{blurbs[i]}</p>
+      </section>
+    {/each}
+  </div>
 </main>
 
+
+
+
+
+
 <style>
+  @import '../../static/css/styles.css';
+
   main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: center; */
   }
   .time-scale button {
     margin: 5px;
