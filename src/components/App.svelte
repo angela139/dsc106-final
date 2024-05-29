@@ -138,6 +138,17 @@
   svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
   svg.select(".y-axis").transition().duration(500).call(d3.axisLeft(y));
 
+  // Tooltip
+  const tooltip = d3.select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background-color", "white")
+      .style("border", "1px solid #ccc")
+      .style("padding", "10px")
+      .style("border-radius", "4px");
+
   // Bind data to bars
   const bars = svg.selectAll(".bar")
     .data(data, d => d.most_serious_bias_type);
@@ -159,6 +170,17 @@
     .attr("y", y(0)) // Start from bottom
     .attr("height", 0) // Initially no height
     .attr("fill", "steelblue")
+    .on("mouseover", (event, d) => {
+        tooltip.style("visibility", "visible")
+               .text(`${d.most_serious_bias_type}: ${d.value}`);
+      })
+      .on("mousemove", event => {
+        tooltip.style("top", (event.pageY - 10) + "px")
+               .style("left", (event.pageX + 10) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("visibility", "hidden");
+      })
     .merge(bars) // Combine enter and update selections
     .transition()
     .duration(500)
