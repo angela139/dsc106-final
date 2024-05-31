@@ -230,6 +230,7 @@ const resizeWindow = () => {
     <div id="bar-chart" style="position: sticky; top: 10px;"></div>
   </div>
   <div class="right">
+    <h1>Examining the Link: The Rise of Hate Crimes And Social Justice Movements In San Francisco</h1>
     {#each terms as term, i}
       <section class="blurbs">
         <h2>{term}</h2>
