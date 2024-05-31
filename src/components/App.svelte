@@ -98,7 +98,7 @@
     svg = d3.select("#bar-chart")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("height", height + margin.top + margin.bottom + 20)
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -123,6 +123,21 @@
       .style("text-anchor", "end");
 
     svg.append("g").attr("class", "y-axis")
+    
+    svg.append("text")
+      .attr("class", "x-axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", width/2)
+      .attr("y", height + margin.bottom + 10)
+      .text("Bias Type")
+
+      svg.append("text")
+         .attr("class", "y-axis-label")
+         .attr("text-anchor", "middle")
+         .attr("transform", "rotate(-90)")
+         .attr("x", -height / 2)
+         .attr("y", -margin.left + 20)
+         .text("Number of Hate Crime Incidents");
   }
 
   const x = d3.scaleBand()
@@ -215,9 +230,8 @@ const resizeWindow = () => {
     <div id="bar-chart" style="position: sticky; top: 10px;"></div>
   </div>
   <div class="right">
-    <h1>Examining the Link: The Rise of Hate Crimes And Social Justice Movements In San Francisco</h1>
     {#each terms as term, i}
-      <section style="min-height: 100vh; padding: 20px;">
+      <section class="blurbs">
         <h2>{term}</h2>
         <p>{blurbs[i]}</p>
       </section>
@@ -233,23 +247,6 @@ const resizeWindow = () => {
 <style>
   @import '../../static/css/styles.css';
 
-  main {
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* align-items: center; */
-  }
-  .time-scale button {
-    margin: 5px;
-    padding: 5px;
-  }
-  .blurb {
-    width: 90%;
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    font-size: 18px;
-  }
-
   .bar {
     fill: steelblue;
   }
@@ -258,4 +255,13 @@ const resizeWindow = () => {
     background-color: #f4f4f4;
     border: 1px solid #ccc;
   }
+
+  .blurbs {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh; 
+    padding: 20px;
+  }
+  
 </style>
