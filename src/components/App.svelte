@@ -65,7 +65,7 @@
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
-    const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight));
+    const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight) - 1);
     if (newSection !== currentSection) {
       currentSection = newSection;
       loadDataAndChart(terms[currentSection]);
@@ -94,7 +94,7 @@
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (currentSection !== 0){ 
+  if (currentSection !== -1){ 
     if (svg.empty()) {
       svg = d3.select("#bar-chart")
               .append("svg")
@@ -163,7 +163,10 @@
         .style("background-color", "white")
         .style("border", "1px solid #ccc")
         .style("padding", "10px")
-        .style("border-radius", "4px");
+        .style("border-radius", "4px")
+        .on("mouseover", (event, d) => {
+          tooltip.style("visibility", "hidden")
+        });
 
     // Bind data to bars
     const bars = svg.selectAll(".bar")
@@ -211,8 +214,19 @@
       .attr("height", 0)
       .remove();
     } else {
+      const bars = svg.selectAll(".bar")
+      bars.exit()
+       .transition()
+      // .attr("y", y(0))
+      // .attr("height", 0)
+       .on("end", function() {
+        if (svg.selectAll(".bar").empty()) {
+            tooltip.style("visibility", "hidden");
+        }
+       })
+       .remove();
+      //bars.remove();
       svg.remove();
-      console.log(svg.empty());
     }
 }
 
