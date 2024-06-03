@@ -94,121 +94,126 @@
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (svg.empty()) {
-    svg = d3.select("#bar-chart")
-            .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom + 20)
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
+  if (currentSection !== 0){ 
+    if (svg.empty()) {
+      svg = d3.select("#bar-chart")
+              .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom + 20)
+              .append("g")
+              .attr("transform", `translate(${margin.left},${margin.top})`);
 
 
-  // var xAxis = d3.svg.axis()
-    // .scale(x);
+    // var xAxis = d3.svg.axis()
+      // .scale(x);
 
-    // Append the g elements for axes only once
-    svg.append("g").attr("class", "x-axis")
-       .attr("transform", `translate(0,${height}) `)
-       .selectAll("text")
-        .attr("transform", "rotate(-65)")
+      // Append the g elements for axes only once
+      svg.append("g").attr("class", "x-axis")
+        .attr("transform", `translate(0,${height}) `)
+        .selectAll("text")
+          .attr("transform", "rotate(-65)")
 
 
-      //  .attr("transform", "")
-      //  .width('10px')
-      //   .selectAll("text")  
-          .style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em")
-      //     .attr("transform", "rotate(-65)" );
-      .style("text-anchor", "end");
+        //  .attr("transform", "")
+        //  .width('10px')
+        //   .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+        //     .attr("transform", "rotate(-65)" );
+        .style("text-anchor", "end");
 
-    svg.append("g").attr("class", "y-axis")
-    
-    svg.append("text")
-      .attr("class", "x-axis-label")
-      .attr("text-anchor", "middle")
-      .attr("x", width/2)
-      .attr("y", height + margin.bottom + 10)
-      .text("Bias Type")
-
+      svg.append("g").attr("class", "y-axis")
+      
       svg.append("text")
-         .attr("class", "y-axis-label")
-         .attr("text-anchor", "middle")
-         .attr("transform", "rotate(-90)")
-         .attr("x", -height / 2)
-         .attr("y", -margin.left + 20)
-         .text("Number of Hate Crime Incidents");
-  }
+        .attr("class", "x-axis-label")
+        .attr("text-anchor", "middle")
+        .attr("x", width/2)
+        .attr("y", height + margin.bottom + 10)
+        .text("Bias Type")
 
-  const x = d3.scaleBand()
-    .range([0, width])
-    .padding(0.1)
-    .domain(data.map(d => d.most_serious_bias_type));
+        svg.append("text")
+          .attr("class", "y-axis-label")
+          .attr("text-anchor", "middle")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -height / 2)
+          .attr("y", -margin.left + 20)
+          .text("Number of Hate Crime Incidents");
+    }
 
-  const y = d3.scaleLinear()
-    .range([height, 0])
-    .domain([0, 300]);
+    const x = d3.scaleBand()
+      .range([0, width])
+      .padding(0.1)
+      .domain(data.map(d => d.most_serious_bias_type));
 
-  // Update axes
-  svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
-  svg.select(".y-axis").transition().duration(500).call(d3.axisLeft(y));
+    const y = d3.scaleLinear()
+      .range([height, 0])
+      .domain([0, 300]);
 
-  // Tooltip
-  const tooltip = d3.select("body")
-      .append("div")
-      .attr("class", "tooltip")
-      .style("position", "absolute")
-      .style("visibility", "hidden")
-      .style("background-color", "white")
-      .style("border", "1px solid #ccc")
-      .style("padding", "10px")
-      .style("border-radius", "4px");
+    // Update axes
+    svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
+    svg.select(".y-axis").transition().duration(500).call(d3.axisLeft(y));
 
-  // Bind data to bars
-  const bars = svg.selectAll(".bar")
-    .data(data, d => d.most_serious_bias_type);
+    // Tooltip
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background-color", "white")
+        .style("border", "1px solid #ccc")
+        .style("padding", "10px")
+        .style("border-radius", "4px");
 
-  // Update existing bars
-  bars.transition()
-    .duration(500)
-    .attr("x", d => x(d.most_serious_bias_type))
-    .attr("width", x.bandwidth())
-    .attr("y", d => y(d.value))
-    .attr("height", d => height - y(d.value));
+    // Bind data to bars
+    const bars = svg.selectAll(".bar")
+      .data(data, d => d.most_serious_bias_type);
 
-  // Enter new bars
-  bars.enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", d => x(d.most_serious_bias_type))
-    .attr("width", x.bandwidth())
-    .attr("y", y(0)) // Start from bottom
-    .attr("height", 0) // Initially no height
-    .attr("fill", "steelblue")
-    .on("mouseover", (event, d) => {
-        tooltip.style("visibility", "visible")
-               .text(`${d.most_serious_bias_type}: ${d.value}`);
-      })
-      .on("mousemove", event => {
-        tooltip.style("top", (event.pageY - 10) + "px")
-               .style("left", (event.pageX + 10) + "px");
-      })
-      .on("mouseout", () => {
-        tooltip.style("visibility", "hidden");
-      })
-    .merge(bars) // Combine enter and update selections
-    .transition()
-    .duration(500)
-    .attr("y", d => y(d.value))
-    .attr("height", d => height - y(d.value));
+    // Update existing bars
+    bars.transition()
+      .duration(500)
+      .attr("x", d => x(d.most_serious_bias_type))
+      .attr("width", x.bandwidth())
+      .attr("y", d => y(d.value))
+      .attr("height", d => height - y(d.value));
 
-  // Exit and remove old bars
-  bars.exit()
-    .transition()
-    .duration(500)
-    .attr("y", y(0))
-    .attr("height", 0)
-    .remove();
+    // Enter new bars
+    bars.enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", d => x(d.most_serious_bias_type))
+      .attr("width", x.bandwidth())
+      .attr("y", y(0)) // Start from bottom
+      .attr("height", 0) // Initially no height
+      .attr("fill", "steelblue")
+      .on("mouseover", (event, d) => {
+          tooltip.style("visibility", "visible")
+                .text(`${d.most_serious_bias_type}: ${d.value}`);
+        })
+        .on("mousemove", event => {
+          tooltip.style("top", (event.pageY - 10) + "px")
+                .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", () => {
+          tooltip.style("visibility", "hidden");
+        })
+      .merge(bars) // Combine enter and update selections
+      .transition()
+      .duration(500)
+      .attr("y", d => y(d.value))
+      .attr("height", d => height - y(d.value));
+
+    // Exit and remove old bars
+    bars.exit()
+      .transition()
+      .duration(500)
+      .attr("y", y(0))
+      .attr("height", 0)
+      .remove();
+    } else {
+      svg.remove();
+      console.log(svg.empty());
+    }
 }
 
 const resizeWindow = () => {
