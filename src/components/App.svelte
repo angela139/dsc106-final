@@ -68,13 +68,18 @@
   onMount(() => {
     window.addEventListener('scroll', handleScroll);
     loadDataAndChart(terms[0]); // Load initial data
+    numOverTime();
   });
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
     const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight) - 1);
+    if (currentSection == -1){
+      d3.select('#line-chart').style("display", "block")
+    }
     if (newSection !== currentSection) {
       currentSection = newSection;
+      d3.select('#line-chart').style("display", "none")
       loadDataAndChart(terms[currentSection]);
     }
   }
@@ -102,7 +107,6 @@
       most_serious_bias_type: d['most_serious_bias_type'],
       value: parseFloat(d[selectedTerm])
     }));
-    console.log(parsedData);
     return parsedData;
   }
 
@@ -255,12 +259,134 @@
     }
 }
 
+const drawLineGraph = (svg, data, width, height, margin) => {
+  const parseDate = d3.timeParse("%Y");
+
+  data.forEach(d => {
+    d.occurence_year = parseDate(d.occurence_year);
+    d.total_number_of_individual_victims = +d.total_number_of_individual_victims;
+  });
+
+  // Set up scales
+  const x = d3.scaleTime()
+    .domain(d3.extent(data, d => d.occurence_year))
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.total_number_of_individual_victims)])
+    .nice()
+    .range([height, 0]);
+
+  const line = d3.line()
+    .x(d => x(d.occurence_year))
+    .y(d => y(d.total_number_of_individual_victims));
+
+  const path = svg.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 2)
+    .attr("d", line);
+
+  path.attr("stroke-dasharray", function() {
+    const length = this.getTotalLength();
+    return length + "," + length;
+  })
+  .attr("stroke-dashoffset", function() {
+    return this.getTotalLength();
+  })
+  .transition()
+  .duration(3000) // Adjust duration as needed
+  .ease(d3.easeLinear)
+  .attr("stroke-dashoffset", 0);
+
+
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  svg.append("text")
+    .attr("class", "x-axis-label")
+    .attr("text-anchor", "middle")
+    .attr("x", width/2)
+    .attr("y", height + margin.bottom + 10)
+    .text("Year")
+
+  svg.append("text")
+    .attr("class", "y-axis-label")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -margin.left + 20)
+    .text("Number of Hate Crime Incidents");
+
+  svg.append("text")
+    .attr("class", "chart-title")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", -margin.top / 2)
+    .attr("font-size", "20px")
+    .attr("font-weight", "bold")
+    .text("Number of Hate Crime Incidents In San Francisco Over Time");
+
+  const tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("background-color", "white")
+    .style("border", "1px solid #ccc")
+    .style("padding", "10px")
+    .style("border-radius", "4px");
+
+  // Add mouseover event handlers for displaying tooltip
+  svg.selectAll("circle")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("cx", d => x(d.occurence_year))
+    .attr("cy", d => y(d.total_number_of_individual_victims))
+    .attr("r", 5)
+    .attr("fill", "steelblue")
+    .on("mouseover", (event, d) => {
+      tooltip.style("visibility", "visible")
+        .html(`<strong>Year:</strong> ${d.occurence_year.getFullYear()}<br><strong>Total Victims:</strong> ${d.total_number_of_individual_victims}`);
+    })
+    .on("mousemove", event => {
+      tooltip.style("top", (event.pageY - 10) + "px")
+        .style("left", (event.pageX + 10) + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("visibility", "hidden");
+    });
+}
+
+const numOverTime = () => {
+  d3.csv(`${base}/victims_over_time.csv`).then(data => {
+    const margin = { top: 30, right: 30, bottom: 30, left: 60 };
+    const width = innerWidth*0.4;
+    const height = innerHeight-200;
+
+    const svg = d3.select("#line-chart").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom + 20)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    drawLineGraph(svg, data, width, height, margin);
+});
+}
+
 </script>
 
 <svelte:window bind:innerWidth />
 
 <main>
   <div class="left">
+    <div id="line-chart"></div>
     <div id="bar-chart" style="position: sticky; top: 10px;"></div>
   </div>
   <div class="right">
