@@ -57,6 +57,14 @@
     '\tDuring the rise of the coronavirus pandemic, Asian Americans faced hate crimes due to the belief that they caused the pandemic, exacerbated by rhetoric from former President Donald Trump who called COVID-19 the “China Virus”. From March 2020 to March 2021, the organization Stop AAPI Hate reported that there were 6,603 hate crimes against Asian Americans, according to NPR. On May 20, 2021, President Biden signed the COVID-19 Hate Crimes Act in response to the rise of Asian American hate, which aimed to make reporting hate crimes easier.\t\n In the present day, the Palestine-Israel conflict has been gaining traction in the United States media, as people are protesting against the war. With such a contested topic, there have been many protests on either side. Unfortunately, there has been a suspected rise in religious hate crimes since the start of the war, with anti-semitic and Islamophobic crimes targeting members on both sides of the conflict.'
   ];
 
+  const images = ['https://images.wsj.net/im-394615?width=1920',
+  'https://static01.nyt.com/images/2009/02/08/business/08stream_600.jpg?quality=75&auto=webp',
+  'https://www.matthewshepard.org/wp-content/uploads/2020/04/Obama-passing-prevention-act-1.jpg',
+  'https://assets.apnews.com/05/85/8194b8d0be0147eb15649784e23a/04c53adcfa5341a29da266a6aba12d66',
+  'https://static.politico.com/70/8e/53affa2c466695e48a9063551bda/20210112-trump-wall-ap-773.jpg',
+  'https://media-cldnry.s-nbcnews.com/image/upload/t_fit-1240w,f_auto,q_auto:best/rockcms/2021-04/210413-Bellevue-stop-aapi-hate-rally-ac-424p-4e6a6a.jpg'
+  ]
+
   onMount(() => {
     window.addEventListener('scroll', handleScroll);
     loadDataAndChart(terms[0]); // Load initial data
@@ -251,6 +259,7 @@
     {#each terms as term, i}
       <section class="blurbs">
         <h2>{term}</h2>
+        <img src={images[i]}/>
         <p>{blurbs[i]}</p>
       </section>
     {/each}
