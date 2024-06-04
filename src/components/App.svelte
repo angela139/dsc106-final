@@ -3,7 +3,7 @@
   import * as d3 from 'd3';
   import { base } from '$app/paths';
 
-  let currentSection = 0;
+  let currentSection = -1;
   let innerWidth;
 
   const terms = [
@@ -73,8 +73,19 @@
 
   async function loadDataAndChart(selectedTerm) {
     const data = await load_data(selectedTerm);
+    //const bias_data = await load_bias_data(selectedBias);
     updateChart(data);
   }
+
+  // async function load_bias_data(selectedBias){
+  //   const response = await fetch(`${base}/bias_type.csv`);
+  //   const data = await response.text();
+  //   const parsedData = d3.csvParse(data, d => ({
+  //     most_serious_bias: d['most_serious_bias'],
+  //     value: parseFloat(d[selectedBias])
+  //   }));
+  //   return;
+  // }
 
   async function load_data(selectedTerm) {
     const response = await fetch(`${base}/summed_victims_terms.csv`);
@@ -83,6 +94,7 @@
       most_serious_bias_type: d['most_serious_bias_type'],
       value: parseFloat(d[selectedTerm])
     }));
+    console.log(parsedData);
     return parsedData;
   }
 
@@ -93,7 +105,7 @@
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (currentSection !== -1){ 
+  if (currentSection > -1){ 
     if (svg.empty()) {
       svg = d3.select("#bar-chart")
               .append("svg")
@@ -225,15 +237,12 @@
       const bars = svg.selectAll(".bar")
       bars.exit()
        .transition()
-      // .attr("y", y(0))
-      // .attr("height", 0)
        .on("end", function() {
         if (svg.selectAll(".bar").empty()) {
             tooltip.style("visibility", "hidden");
         }
        })
        .remove();
-      //bars.remove();
       svg.remove();
     }
 }
