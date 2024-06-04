@@ -3,7 +3,6 @@
   import * as d3 from 'd3';
   import { base } from '$app/paths';
 
-  let hatecrime_data = [];
   let currentSection = 0;
   let innerWidth;
 
@@ -88,7 +87,7 @@
   }
 
   function updateChart(data) {
-  const margin = { top: 20, right: 30, bottom: 30, left: 60 };
+  const margin = { top: 30, right: 30, bottom: 30, left: 60 };
   const width = innerWidth*0.4;
   const height = innerHeight-200;
 
@@ -132,13 +131,22 @@
         .attr("y", height + margin.bottom + 10)
         .text("Bias Type")
 
-        svg.append("text")
-          .attr("class", "y-axis-label")
-          .attr("text-anchor", "middle")
-          .attr("transform", "rotate(-90)")
-          .attr("x", -height / 2)
-          .attr("y", -margin.left + 20)
-          .text("Number of Hate Crime Incidents");
+      svg.append("text")
+        .attr("class", "y-axis-label")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -margin.left + 20)
+        .text("Number of Hate Crime Incidents");
+
+      svg.append("text")
+        .attr("class", "chart-title")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", -margin.top / 2)
+        .attr("font-size", "20px")
+        .attr("font-weight", "bold")
+        .text("Number of Hate Crime Incidents In San Francisco");
     }
 
     const x = d3.scaleBand()
@@ -148,7 +156,7 @@
 
     const y = d3.scaleLinear()
       .range([height, 0])
-      .domain([0, 300]);
+      .domain([0, 400]);
 
     // Update axes
     svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
@@ -228,16 +236,6 @@
       //bars.remove();
       svg.remove();
     }
-}
-
-const resizeWindow = () => {
-  innerWidth = window.innerWidth
-  innerHeight = window.innerHeight
-
-  d3.select("#bar-chart")
-    .attr("scale", innerWidth/4000)
-
-    // .attr("height", innerHeight*0.5)
 }
 
 </script>
