@@ -305,8 +305,10 @@ function drawBar(data) {
           tooltip.style("visibility", "hidden")
         });
 
+    const chartContain = svg.select('.chart-contain')
+
     // Bind data to bars
-    const bars = svg.selectAll(".bar")
+    const bars = chartContain.selectAll(".bar")
       .data(data, d => d.most_serious_bias_type);
 
     // Update existing bars
