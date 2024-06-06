@@ -333,7 +333,7 @@ const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
     .attr("transform", "rotate(-90)")
     .attr("x", -height / 2)
     .attr("y", -margin.left + 20)
-    .text("Number of Hate Crime Incidents");
+    .text(`Number of ${bias} Hate Crime Incidents`);
 
   svg.append("text")
     .attr("class", "chart-title")
@@ -342,7 +342,7 @@ const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
     .attr("y", -margin.top / 2)
     .attr("font-size", "20px")
     .attr("font-weight", "bold")
-    .text("Number of Hate Crime Incidents In San Francisco Over Time");
+    .text(`Number of ${bias} Hate Crime Incidents In San Francisco Over Time`);
 
   const tooltip = d3.select("body")
     .append("div")

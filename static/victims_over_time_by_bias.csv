@@ -1,20 +1,24 @@
 occurence_year,most_serious_bias_type,total_number_of_individual_victims
 2001,Disability,0
+2001,Gender,0
 2001,Gender Nonconforming,2
 2001,Race,110
 2001,Religion,21
 2001,Sexual Orientation,59
 2002,Disability,0
+2002,Gender,0
 2002,Gender Nonconforming,1
 2002,Race,109
 2002,Religion,26
 2002,Sexual Orientation,63
 2003,Disability,1
+2003,Gender,0
 2003,Gender Nonconforming,7
 2003,Race,78
 2003,Religion,13
 2003,Sexual Orientation,53
 2004,Disability,0
+2004,Gender,0
 2004,Gender Nonconforming,6
 2004,Race,91
 2004,Religion,18
@@ -26,6 +30,7 @@ occurence_year,most_serious_bias_type,total_number_of_individual_victims
 2005,Religion,5
 2005,Sexual Orientation,54
 2006,Disability,0
+2006,Gender,0
 2006,Gender Nonconforming,7
 2006,Race,39
 2006,Religion,8
@@ -37,41 +42,49 @@ occurence_year,most_serious_bias_type,total_number_of_individual_victims
 2007,Religion,6
 2007,Sexual Orientation,21
 2008,Disability,1
+2008,Gender,0
 2008,Gender Nonconforming,6
 2008,Race,29
 2008,Religion,9
 2008,Sexual Orientation,83
 2009,Disability,0
+2009,Gender,0
 2009,Gender Nonconforming,1
 2009,Race,12
 2009,Religion,7
 2009,Sexual Orientation,9
 2010,Disability,0
+2010,Gender,0
 2010,Gender Nonconforming,3
 2010,Race,38
 2010,Religion,5
 2010,Sexual Orientation,29
 2011,Disability,0
+2011,Gender,0
 2011,Gender Nonconforming,3
 2011,Race,24
 2011,Religion,7
 2011,Sexual Orientation,28
 2012,Disability,0
+2012,Gender,0
 2012,Gender Nonconforming,6
 2012,Race,16
 2012,Religion,1
 2012,Sexual Orientation,25
 2013,Disability,0
+2013,Gender,0
 2013,Gender Nonconforming,3
 2013,Race,8
 2013,Religion,1
 2013,Sexual Orientation,13
 2014,Disability,0
+2014,Gender,0
 2014,Gender Nonconforming,2
 2014,Race,5
 2014,Religion,0
 2014,Sexual Orientation,12
 2015,Disability,0
+2015,Gender,0
 2015,Gender Nonconforming,3
 2015,Race,13
 2015,Religion,1
@@ -83,26 +96,31 @@ occurence_year,most_serious_bias_type,total_number_of_individual_victims
 2016,Religion,4
 2016,Sexual Orientation,18
 2017,Disability,0
+2017,Gender,0
 2017,Gender Nonconforming,5
 2017,Race,24
 2017,Religion,13
 2017,Sexual Orientation,13
 2018,Disability,0
+2018,Gender,0
 2018,Gender Nonconforming,3
 2018,Race,42
 2018,Religion,9
 2018,Sexual Orientation,18
 2019,Disability,0
+2019,Gender,0
 2019,Gender Nonconforming,4
 2019,Race,40
 2019,Religion,7
 2019,Sexual Orientation,28
 2020,Disability,0
+2020,Gender,0
 2020,Gender Nonconforming,2
 2020,Race,39
 2020,Religion,4
 2020,Sexual Orientation,9
 2021,Disability,0
+2021,Gender,0
 2021,Gender Nonconforming,1
 2021,Race,75
 2021,Religion,3
@@ -114,11 +132,14 @@ occurence_year,most_serious_bias_type,total_number_of_individual_victims
 2022,Religion,7
 2022,Sexual Orientation,7
 2023,Disability,0
+2023,Gender,0
 2023,Gender Nonconforming,9
 2023,Race,32
 2023,Religion,13
 2023,Sexual Orientation,12
 2024,Disability,1
+2024,Gender,0
+2024,Gender Nonconforming,0
 2024,Race,7
 2024,Religion,0
 2024,Sexual Orientation,6
