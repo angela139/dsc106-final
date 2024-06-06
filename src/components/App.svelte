@@ -69,6 +69,9 @@
     window.addEventListener('scroll', handleScroll);
     loadDataAndChart(terms[0]); // Load initial data
     numOverTime();
+    document.getElementById("bias-selector").addEventListener("change", () => {
+      numOverTime();
+    });
   });
 
   function handleScroll() {
@@ -76,10 +79,12 @@
     const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight) - 1);
     if (currentSection == -1){
       d3.select('#line-chart').style("display", "block")
+      d3.select('#bias-select').style("display", "block")
     }
     if (newSection !== currentSection) {
       currentSection = newSection;
       d3.select('#line-chart').style("display", "none")
+      d3.select('#bias-select').style("display", "none")
       loadDataAndChart(terms[currentSection]);
     }
   }
@@ -259,21 +264,28 @@
     }
 }
 
-const drawLineGraph = (svg, data, width, height, margin) => {
+const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
+  // Selector
+  const biasTypes = ["Total", "Disability", "Gender", "Gender Nonconforming", "Race", "Religion", "Sexual Orientation"]
+
+  const colorScale = d3.scaleOrdinal()
+    .domain(biasTypes)
+    .range(d3.schemeCategory10);
+
   const parseDate = d3.timeParse("%Y");
 
-  data.forEach(d => {
+  filteredData.forEach(d => {
     d.occurence_year = parseDate(d.occurence_year);
     d.total_number_of_individual_victims = +d.total_number_of_individual_victims;
   });
 
   // Set up scales
   const x = d3.scaleTime()
-    .domain(d3.extent(data, d => d.occurence_year))
+    .domain(d3.extent(filteredData, d => d.occurence_year))
     .range([0, width]);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.total_number_of_individual_victims)])
+    .domain([0, d3.max(filteredData, d => d.total_number_of_individual_victims)])
     .nice()
     .range([height, 0]);
 
@@ -281,10 +293,10 @@ const drawLineGraph = (svg, data, width, height, margin) => {
     .x(d => x(d.occurence_year))
     .y(d => y(d.total_number_of_individual_victims));
 
-  const path = svg.append("path")
-    .datum(data)
+  let path = svg.append("path")
+    .datum(filteredData)
     .attr("fill", "none")
-    .attr("stroke", "steelblue")
+    .attr("stroke", colorScale(bias))
     .attr("stroke-width", 2)
     .attr("d", line);
 
@@ -296,7 +308,7 @@ const drawLineGraph = (svg, data, width, height, margin) => {
     return this.getTotalLength();
   })
   .transition()
-  .duration(3000) // Adjust duration as needed
+  .duration(3000)
   .ease(d3.easeLinear)
   .attr("stroke-dashoffset", 0);
 
@@ -344,7 +356,7 @@ const drawLineGraph = (svg, data, width, height, margin) => {
 
   // Add mouseover event handlers for displaying tooltip
   svg.selectAll("circle")
-    .data(data)
+    .data(filteredData)
     .enter()
     .append("circle")
     .attr("cx", d => x(d.occurence_year))
@@ -362,10 +374,15 @@ const drawLineGraph = (svg, data, width, height, margin) => {
     .on("mouseout", () => {
       tooltip.style("visibility", "hidden");
     });
+
 }
 
 const numOverTime = () => {
-  d3.csv(`${base}/victims_over_time.csv`).then(data => {
+  const lineSVG = d3.select("#line-chart").select("svg")
+  if (!lineSVG.empty()) {
+    lineSVG.remove()
+  }
+  d3.csv(`${base}/victims_over_time_by_bias.csv`).then(data => {
     const margin = { top: 30, right: 30, bottom: 30, left: 60 };
     const width = innerWidth*0.4;
     const height = innerHeight-200;
@@ -376,7 +393,11 @@ const numOverTime = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    drawLineGraph(svg, data, width, height, margin);
+    const selectedBias = document.getElementById('bias-selector').value;
+    
+    const filteredData = data.filter(d => d.most_serious_bias_type == selectedBias)
+
+    drawLineGraph(svg, filteredData, width, height, margin, selectedBias);
 });
 }
 
@@ -386,6 +407,18 @@ const numOverTime = () => {
 
 <main>
   <div class="left">
+    <div id="bias-select">
+      <label for="bias-selector">Select Bias Type:</label>
+      <select id="bias-selector">
+        <option value="Total">Total</option>
+        <option value="Disability">Disability</option>
+        <option value="Gender">Gender</option>
+        <option value="Gender Nonconforming">Gender Nonconforming</option>
+        <option value="Race">Race</option>
+        <option value="Religion">Religion</option>
+        <option value="Sexual Orientation">Sexual Orientation</option>
+      </select>
+    </div>
     <div id="line-chart"></div>
     <div id="bar-chart" style="position: sticky; top: 10px;"></div>
   </div>
