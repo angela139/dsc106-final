@@ -134,50 +134,6 @@
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
   if (currentSection > -1){ 
-    if (svg.empty()) {
-      svg = d3.select("#bar-chart")
-              .append("svg")
-              .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom + 20)
-              .append("g")
-              .attr("transform", `translate(${margin.left},${margin.top})`);
-
-      // Append the g elements for axes only once
-      svg.append("g").attr("class", "x-axis")
-        .attr("transform", `translate(0,${height}) `)
-        .selectAll("text")
-          .attr("transform", "rotate(-65)")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-        .style("text-anchor", "end");
-
-      svg.append("g").attr("class", "y-axis")
-      
-      svg.append("text")
-        .attr("class", "x-axis-label")
-        .attr("text-anchor", "middle")
-        .attr("x", width/2)
-        .attr("y", height + margin.bottom + 10)
-        .text("Bias Type")
-
-      svg.append("text")
-        .attr("class", "y-axis-label")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left + 20)
-        .text("Number of Hate Crime Incidents");
-
-      svg.append("text")
-        .attr("class", "chart-title")
-        .attr("text-anchor", "middle")
-        .attr("x", width / 2)
-        .attr("y", -margin.top / 2)
-        .attr("font-size", "20px")
-        .attr("font-weight", "bold")
-        .text("Number of Hate Crime Incidents In San Francisco");
-    }
 
     const x = d3.scaleBand()
       .range([0, width])
@@ -206,9 +162,12 @@
           tooltip.style("visibility", "hidden")
         });
 
+    const chartContain = svg.select('.chart-contain')
+
     // Bind data to bars
-    const bars = svg.selectAll(".bar")
+    const bars = chartContain.selectAll(".bar")
       .data(data, d => d.most_serious_bias);
+
 
     // Update existing bars
     bars.transition()
@@ -279,6 +238,7 @@ function drawBar(data) {
               .attr("width", width + margin.left + margin.right)
               .attr("height", height + margin.top + margin.bottom + 20)
               .append("g")
+              .attr("class", "chart-contain")
               .attr("transform", `translate(${margin.left},${margin.top})`);
 
       // Append the g elements for axes only once
