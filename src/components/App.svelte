@@ -85,8 +85,8 @@
       currentSection = newSection;
       d3.select('#line-chart').style("display", "none")
       console.log(currentSection);
-      if (currentSection > 6) {
-        loadBiasDataAndBarGraph(selectedBias);
+      if (currentSection > 5) {
+        loadBiasDataAndBarGraph();
       } else if(currentSection > -1) {
         loadDataAndChart(terms[currentSection]);
       }
@@ -226,39 +226,41 @@
 
 function drawBar(data) {
   const margin = { top: 30, right: 30, bottom: 30, left: 60 };
-  const width = innerWidth*0.4;
-  const height = innerHeight-200;
+  const width = innerWidth * 0.4;
+  const height = innerHeight - 200;
+
+  // Define a color scale
+  const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (currentSection > -1){ 
+  if (currentSection > -1) {
     if (svg.empty()) {
       svg = d3.select("#bar-chart")
               .append("svg")
               .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom + 20)
+              .attr("height", height + margin.top + margin.bottom)
               .append("g")
               .attr("class", "chart-contain")
               .attr("transform", `translate(${margin.left},${margin.top})`);
 
       // Append the g elements for axes only once
       svg.append("g").attr("class", "x-axis")
-        .attr("transform", `translate(0,${height}) `)
+        .attr("transform", `translate(0,${height})`)
         .selectAll("text")
           .attr("transform", "rotate(-65)")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-        .style("text-anchor", "end");
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em");
 
-      svg.append("g").attr("class", "y-axis")
+      svg.append("g").attr("class", "y-axis");
       
       svg.append("text")
         .attr("class", "x-axis-label")
         .attr("text-anchor", "middle")
-        .attr("x", width/2)
+        .attr("x", width / 2)
         .attr("y", height + margin.bottom + 10)
-        .text("Bias Type")
+        .text("Bias Type");
 
       svg.append("text")
         .attr("class", "y-axis-label")
@@ -300,24 +302,13 @@ function drawBar(data) {
         .style("background-color", "white")
         .style("border", "1px solid #ccc")
         .style("padding", "10px")
-        .style("border-radius", "4px")
-        .on("mouseover", (event, d) => {
-          tooltip.style("visibility", "hidden")
-        });
+        .style("border-radius", "4px");
 
-    const chartContain = svg.select('.chart-contain')
+    const chartContain = svg.select('.chart-contain');
 
     // Bind data to bars
     const bars = chartContain.selectAll(".bar")
       .data(data, d => d.most_serious_bias_type);
-
-    // Update existing bars
-    bars.transition()
-      .duration(500)
-      .attr("x", d => x(d.most_serious_bias_type))
-      .attr("width", x.bandwidth())
-      .attr("y", d => y(d.value))
-      .attr("height", d => height - y(d.value));
 
     // Enter new bars
     bars.enter()
@@ -325,20 +316,20 @@ function drawBar(data) {
       .attr("class", "bar")
       .attr("x", d => x(d.most_serious_bias_type))
       .attr("width", x.bandwidth())
-      .attr("y", y(0)) // Start from bottom
-      .attr("height", 0) // Initially no height
-      .attr("fill", "steelblue")
+      .attr("y", y(0))
+      .attr("height", 0)
+      .attr("fill", d => colorScale(d.most_serious_bias_type))
       .on("mouseover", (event, d) => {
-          tooltip.style("visibility", "visible")
-                .text(`${d.most_serious_bias_type}: ${d.value}`);
-        })
-        .on("mousemove", event => {
-          tooltip.style("top", (event.pageY - 10) + "px")
-                .style("left", (event.pageX + 10) + "px");
-        })
-        .on("mouseout", () => {
-          tooltip.style("visibility", "hidden");
-        })
+        tooltip.style("visibility", "visible")
+               .text(`${d.most_serious_bias_type}: ${d.value}`);
+      })
+      .on("mousemove", event => {
+        tooltip.style("top", (event.pageY - 10) + "px")
+               .style("left", (event.pageX + 10) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("visibility", "hidden");
+      })
       .merge(bars) // Combine enter and update selections
       .transition()
       .duration(500)
@@ -506,8 +497,7 @@ const numOverTime = () => {
       </section>
     {/each}
     <section class="blurbs">
-      <h2>YAP YAP YAP YAP YAP YAP</h2>
-      <p></p>
+      <h2>Sub-Categories of Bias</h2>
       <select id="bias-select" name="bias">
         <option value="Disability">Disability</option>
         <option value="Gender">Gender</option>
@@ -516,6 +506,7 @@ const numOverTime = () => {
         <option value="Religion">Religion</option>
         <option value="Sexual Orientation">Sexual Orientation</option>
       </select>
+      <p>Within each bias type there are various types of motivaitons for each hate crime. We can see that within broad categories that certain communities are at greater risk of being victims</p>
     </section>
   </div>
 </main>
