@@ -72,19 +72,25 @@
     document.getElementById("bias-selector").addEventListener("change", () => {
       numOverTime();
     });
+    document.getElementById("bias-type-select").addEventListener("change", () => {
+      loadBiasDataAndBarGraph();
+    });
   });
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
-    const newSection = Math.min(terms.length , Math.floor(window.scrollY / sectionHeight) - 1);
+    const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight) - 1);
     if (currentSection == -1){
       d3.select('#line-chart').style("display", "block")
       d3.select('#bias-select').style("display", "block")
     }
     if (newSection !== currentSection) {
       currentSection = newSection;
-      d3.select('#line-chart').style("display", "none")
-      loadDataAndChart(terms[currentSection]);
+      if (currentSection < 6) {
+        d3.select('#line-chart').style("display", "none")
+        d3.select('#bias-select').style("display", "none")
+        loadDataAndChart(terms[currentSection]);
+      }
     }
   }
 
@@ -95,7 +101,7 @@
   }
 
   async function loadBiasDataAndBarGraph() {
-    const selectedBias = document.getElementById("bias-select").value;
+    const selectedBias = document.getElementById("bias-type-select").value;
     const bias_data = await load_bias_data(selectedBias);
     updateChart(bias_data);
   }
@@ -521,7 +527,7 @@ const numOverTime = () => {
     {/each}
     <section class="blurbs">
       <h2>Sub-Categories of Bias</h2>
-      <select id="bias-select" name="bias">
+      <select id="bias-type-select" name="bias">
         <option value="Disability">Disability</option>
         <option value="Gender">Gender</option>
         <option value="Gender Nonconforming">Gender Nonconforming</option>
