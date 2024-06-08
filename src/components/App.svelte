@@ -76,7 +76,7 @@
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
-    const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight) - 1);
+    const newSection = Math.min(terms.length , Math.floor(window.scrollY / sectionHeight) - 1);
     if (currentSection == -1){
       d3.select('#line-chart').style("display", "block")
       d3.select('#bias-select').style("display", "block")
@@ -84,7 +84,6 @@
     if (newSection !== currentSection) {
       currentSection = newSection;
       d3.select('#line-chart').style("display", "none")
-      d3.select('#bias-select').style("display", "none")
       loadDataAndChart(terms[currentSection]);
     }
   }
@@ -92,18 +91,25 @@
   async function loadDataAndChart(selectedTerm) {
     const data = await load_data(selectedTerm);
     //const bias_data = await load_bias_data(selectedBias);
-    updateChart(data);
+    drawBar(data);
   }
 
-  // async function load_bias_data(selectedBias){
-  //   const response = await fetch(`${base}/bias_type.csv`);
-  //   const data = await response.text();
-  //   const parsedData = d3.csvParse(data, d => ({
-  //     most_serious_bias: d['most_serious_bias'],
-  //     value: parseFloat(d[selectedBias])
-  //   }));
-  //   return;
-  // }
+  async function loadBiasDataAndBarGraph() {
+    const selectedBias = document.getElementById("bias-select").value;
+    const bias_data = await load_bias_data(selectedBias);
+    updateChart(bias_data);
+  }
+
+  async function load_bias_data(selectedBias){
+    const response = await fetch(`${base}/bias_type.csv`);
+    const data = await response.text();
+    const parsedData = d3.csvParse(data, d => ({
+      most_serious_bias: d['most_serious_bias'],
+      value: parseFloat(d[selectedBias])
+    }));
+    const nonZeroData = parsedData.filter(d => d.value !== 0);
+    return nonZeroData;
+  }
 
   async function load_data(selectedTerm) {
     const response = await fetch(`${base}/summed_victims_terms.csv`);
@@ -123,42 +129,133 @@
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
   if (currentSection > -1){ 
+
+    const x = d3.scaleBand()
+      .range([0, width])
+      .padding(0.1)
+      .domain(data.map(d => d.most_serious_bias));
+
+    const y = d3.scaleLinear()
+      .range([height, 0])
+      .domain([0, 400]);
+
+    // Update axes
+    svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
+    svg.select(".y-axis").transition().duration(500).call(d3.axisLeft(y));
+
+    // Tooltip
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background-color", "white")
+        .style("border", "1px solid #ccc")
+        .style("padding", "10px")
+        .style("border-radius", "4px")
+        .on("mouseover", (event, d) => {
+          tooltip.style("visibility", "hidden")
+        });
+
+    const chartContain = svg.select('.chart-contain')
+
+    // Bind data to bars
+    const bars = chartContain.selectAll(".bar")
+      .data(data, d => d.most_serious_bias);
+
+
+    // Update existing bars
+    bars.transition()
+      .duration(500)
+      .attr("x", d => x(d.most_serious_bias))
+      .attr("width", x.bandwidth())
+      .attr("y", d => y(d.value))
+      .attr("height", d => height - y(d.value));
+
+    // Enter new bars
+    bars.enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", d => x(d.most_serious_bias))
+      .attr("width", x.bandwidth())
+      .attr("y", y(0)) // Start from bottom
+      .attr("height", 0) // Initially no height
+      .attr("fill", "steelblue")
+      .on("mouseover", (event, d) => {
+          tooltip.style("visibility", "visible")
+                .text(`${d.most_serious_bias}: ${d.value}`);
+        })
+        .on("mousemove", event => {
+          tooltip.style("top", (event.pageY - 10) + "px")
+                .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", () => {
+          tooltip.style("visibility", "hidden");
+        })
+      .merge(bars) // Combine enter and update selections
+      .transition()
+      .duration(500)
+      .attr("y", d => y(d.value))
+      .attr("height", d => height - y(d.value));
+
+    // Exit and remove old bars
+    bars.exit()
+      .transition()
+      .duration(500)
+      .attr("y", y(0))
+      .attr("height", 0)
+      .remove();
+    } else {
+      const bars = svg.selectAll(".bar")
+      bars.exit()
+       .transition()
+       .on("end", function() {
+        if (svg.selectAll(".bar").empty()) {
+            tooltip.style("visibility", "hidden");
+        }
+       })
+       .remove();
+      svg.remove();
+    }
+}
+
+function drawBar(data) {
+  const margin = { top: 30, right: 30, bottom: 30, left: 60 };
+  const width = innerWidth * 0.4;
+  const height = innerHeight - 200;
+
+  // Define a color scale
+  const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+
+  // Select the SVG, create it if it doesn't exist
+  let svg = d3.select("#bar-chart").select("svg");
+  if (currentSection > -1) {
     if (svg.empty()) {
       svg = d3.select("#bar-chart")
               .append("svg")
               .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom + 20)
+              .attr("height", height + margin.top + margin.bottom)
               .append("g")
+              .attr("class", "chart-contain")
               .attr("transform", `translate(${margin.left},${margin.top})`);
-
-
-    // var xAxis = d3.svg.axis()
-      // .scale(x);
 
       // Append the g elements for axes only once
       svg.append("g").attr("class", "x-axis")
-        .attr("transform", `translate(0,${height}) `)
+        .attr("transform", `translate(0,${height})`)
         .selectAll("text")
           .attr("transform", "rotate(-65)")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em");
 
-
-        //  .attr("transform", "")
-        //  .width('10px')
-        //   .selectAll("text")  
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-        //     .attr("transform", "rotate(-65)" );
-        .style("text-anchor", "end");
-
-      svg.append("g").attr("class", "y-axis")
+      svg.append("g").attr("class", "y-axis");
       
       svg.append("text")
         .attr("class", "x-axis-label")
         .attr("text-anchor", "middle")
-        .attr("x", width/2)
+        .attr("x", width / 2)
         .attr("y", height + margin.bottom + 10)
-        .text("Bias Type")
+        .text("Bias Type");
 
       svg.append("text")
         .attr("class", "y-axis-label")
@@ -200,22 +297,13 @@
         .style("background-color", "white")
         .style("border", "1px solid #ccc")
         .style("padding", "10px")
-        .style("border-radius", "4px")
-        .on("mouseover", (event, d) => {
-          tooltip.style("visibility", "hidden")
-        });
+        .style("border-radius", "4px");
+
+    const chartContain = svg.select('.chart-contain');
 
     // Bind data to bars
-    const bars = svg.selectAll(".bar")
+    const bars = chartContain.selectAll(".bar")
       .data(data, d => d.most_serious_bias_type);
-
-    // Update existing bars
-    bars.transition()
-      .duration(500)
-      .attr("x", d => x(d.most_serious_bias_type))
-      .attr("width", x.bandwidth())
-      .attr("y", d => y(d.value))
-      .attr("height", d => height - y(d.value));
 
     // Enter new bars
     bars.enter()
@@ -223,20 +311,20 @@
       .attr("class", "bar")
       .attr("x", d => x(d.most_serious_bias_type))
       .attr("width", x.bandwidth())
-      .attr("y", y(0)) // Start from bottom
-      .attr("height", 0) // Initially no height
-      .attr("fill", "steelblue")
+      .attr("y", y(0))
+      .attr("height", 0)
+      .attr("fill", d => colorScale(d.most_serious_bias_type))
       .on("mouseover", (event, d) => {
-          tooltip.style("visibility", "visible")
-                .text(`${d.most_serious_bias_type}: ${d.value}`);
-        })
-        .on("mousemove", event => {
-          tooltip.style("top", (event.pageY - 10) + "px")
-                .style("left", (event.pageX + 10) + "px");
-        })
-        .on("mouseout", () => {
-          tooltip.style("visibility", "hidden");
-        })
+        tooltip.style("visibility", "visible")
+               .text(`${d.most_serious_bias_type}: ${d.value}`);
+      })
+      .on("mousemove", event => {
+        tooltip.style("top", (event.pageY - 10) + "px")
+               .style("left", (event.pageX + 10) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("visibility", "hidden");
+      })
       .merge(bars) // Combine enter and update selections
       .transition()
       .duration(500)
@@ -431,6 +519,18 @@ const numOverTime = () => {
         <p>{blurbs[i]}</p>
       </section>
     {/each}
+    <section class="blurbs">
+      <h2>Sub-Categories of Bias</h2>
+      <select id="bias-select" name="bias">
+        <option value="Disability">Disability</option>
+        <option value="Gender">Gender</option>
+        <option value="Gender Nonconforming">Gender Nonconforming</option>
+        <option value="Race" selected="selected">Race</option>
+        <option value="Religion">Religion</option>
+        <option value="Sexual Orientation">Sexual Orientation</option>
+      </select>
+      <p>Within each bias type there are various types of motivaitons for each hate crime. We can see that within broad categories that certain communities are at greater risk of being victims</p>
+    </section>
   </div>
 </main>
 
