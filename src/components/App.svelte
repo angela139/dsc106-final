@@ -73,7 +73,7 @@
 
   onMount(() => {
     window.addEventListener('scroll', handleScroll);
-    loadDataAndChart(terms[0]); // Load initial data
+    loadDataAndChart(terms[1]); // Load initial data
     numOverTime();
     document.getElementById("bias-selector").addEventListener("change", () => {
       numOverTime();
@@ -86,8 +86,9 @@
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
+    const docHeight = d3.select('.right').node().getBoundingClientRect().height;
     const newSection = Math.min(terms.length, Math.floor(window.scrollY / sectionHeight) - 2);
-    console.log(newSection)
+
     if (currentSection == -2){
       d3.select('#line-chart').style("display", "block");
       d3.select('#line-chart').style("opacity", (window.scrollY / sectionHeight));
@@ -103,24 +104,35 @@
       d3.select('#bias-select').style("opacity", (window.scrollY / sectionHeight));
       d3.select('#cover-img').style("display", "none");
     }
+    if(currentSection == 0){
+      loadDataAndChart(terms[currentSection+1]);
+    }
+    if(currentSection == 6){
+      d3.select('#bar-chart').style("display", "block");
+    }
+    if(currentSection == 7){
+      d3.select('#line-chart').style("display", "none");
+      d3.select('#bias-select').style("display", "none");
+      d3.select('#bar-chart').style("display", "none");
+      d3.select('#cover-img').style("display", "block");
+      d3.select('#cover-img').style("opacity", 1-(docHeight-window.scrollY-883)/300);
+      console.log((docHeight-window.scrollY-883));
+    }
     if (newSection !== currentSection) {
       currentSection = newSection;
       if (currentSection < 6) {
-        if(currentSection > 0){
-          d3.select('#cover-img').style("display", "none");
-        }
         if(currentSection > -1){
           d3.select('#line-chart').style("display", "none");
           d3.select('#bias-select').style("display", "none");
+          d3.select('#cover-img').style("display", "none");
         }
-        loadDataAndChart(terms[currentSection]);
+        loadDataAndChart(terms[currentSection+1]);
       }
     }
   }
 
   async function loadDataAndChart(selectedTerm) {
     const data = await load_data(selectedTerm);
-    //const bias_data = await load_bias_data(selectedBias);
     drawBar(data);
   }
 
@@ -142,6 +154,7 @@
   }
 
   async function load_data(selectedTerm) {
+    if(selectedTerm == 0) selectedTerm = 1;
     const response = await fetch(`${base}/summed_victims_terms.csv`);
     const data = await response.text();
     const parsedData = d3.csvParse(data, d => ({
@@ -158,7 +171,7 @@
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (currentSection >= 0){ 
+  if (currentSection > 0){ 
     const x = d3.scaleBand()
       .range([0, width])
       .padding(0.1)
@@ -271,8 +284,6 @@ function drawBar(data) {
       // Append the g elements for axes only once
       svg.append("g").attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
-        // .attr('opacity', '0.2')
-        // .selectAll('.tick').attr("opacity", "0.2")
         .selectAll("text")
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
@@ -567,6 +578,11 @@ const numOverTime = () => {
         <option value="Sexual Orientation">Sexual Orientation</option>
       </select>
       <p>Within each bias type there are various types of motivaitons for each hate crime. We can see that within broad categories that certain communities are at greater risk of being victims</p>
+    </section>
+    <section>
+      <h2 id="conc">Conclusion</h2>
+      <p id="conc-text">Looking at how rates change between terms, one noteworthy data point is how although race-based hate crimes were running rampant during Bush’s first term with the war on terrorism, we can see them taking a backseat to sexuality-based violence in Bush’s second term, potentially correlated to the LGBTQ rights legislation worked on at the time.
+        Overall, we hope that viewers learn more about the varying social movements and how hate crimes and their types can change based on the political landscape, all through our time-based scrollytelling.</p>
     </section>
   </div>
 </main>

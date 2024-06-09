@@ -103,3 +103,15 @@ select, p {
     width: max(400px, 40%);
 }
 
+h2{
+    font-size: 1.5em;
+    color: #aa334f;
+}
+
+#conc{
+    margin: 80% 0 0 20px;
+}
+
+#conc-text{
+    margin: 0 0 80% 20px;
+}
