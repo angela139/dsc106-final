@@ -3,10 +3,11 @@
   import * as d3 from 'd3';
   import { base } from '$app/paths';
 
-  let currentSection = -1;
+  let currentSection = -2;
   let innerWidth;
 
   const terms = [
+    "Overview",
     "2001-2004: George W. Bush's 1st Term",
     "2005-2008: George W. Bush's 2nd Term",
     "2009-2012: Barack Obama's 1st Term",
@@ -16,6 +17,7 @@
   ];
 
   const blurbs = [
+    '\tthis is an overview',
     '\tOn September 11, 2001, terrorists from the Islamic extremist group Al Qaeda hijacked planes and crashed \
     them into the World Trade Center Towers in New York City. Due to the terrorist attacks, almost 3,000 people \
     lost their lives. However, after these attacks, there were concerns of anti-Muslim hate in the United States. \
@@ -57,7 +59,7 @@
     '\tDuring the rise of the coronavirus pandemic, Asian Americans faced hate crimes due to the belief that they caused the pandemic, exacerbated by rhetoric from former President Donald Trump who called COVID-19 the “China Virus”. From March 2020 to March 2021, the organization Stop AAPI Hate reported that there were 6,603 hate crimes against Asian Americans, according to NPR. On May 20, 2021, President Biden signed the COVID-19 Hate Crimes Act in response to the rise of Asian American hate, which aimed to make reporting hate crimes easier.\t\n In the present day, the Palestine-Israel conflict has been gaining traction in the United States media, as people are protesting against the war. With such a contested topic, there have been many protests on either side. Unfortunately, there has been a suspected rise in religious hate crimes since the start of the war, with anti-semitic and Islamophobic crimes targeting members on both sides of the conflict.'
   ];
 
-  const images = ['https://images.wsj.net/im-394615?width=1920',
+  const images = ['', 'https://images.wsj.net/im-394615?width=1920',
   'https://static01.nyt.com/images/2009/02/08/business/08stream_600.jpg?quality=75&auto=webp',
   'https://www.matthewshepard.org/wp-content/uploads/2020/04/Obama-passing-prevention-act-1.jpg',
   'https://assets.apnews.com/05/85/8194b8d0be0147eb15649784e23a/04c53adcfa5341a29da266a6aba12d66',
@@ -75,20 +77,31 @@
     document.getElementById("bias-type-select").addEventListener("change", () => {
       loadBiasDataAndBarGraph();
     });
+    handleScroll()
   });
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
-    const newSection = Math.min(terms.length, Math.floor(window.scrollY / sectionHeight) - 1);
+    const newSection = Math.min(terms.length, Math.floor(window.scrollY / sectionHeight) - 2);
+    console.log(newSection)
+    if (currentSection == -2){
+      d3.select('#line-chart').style("display", "none")
+      d3.select('#bias-select').style("display", "block")
+      d3.select('#cover-img').style("display", "block");
+      d3.select('#cover-img').style("opacity", 1-(window.scrollY / sectionHeight));
+    }
     if (currentSection == -1){
       d3.select('#line-chart').style("display", "block")
       d3.select('#bias-select').style("display", "block")
+      d3.select('#bias-select').style("opacity", (window.scrollY / sectionHeight));
+      d3.select('#cover-img').style("display", "none");
     }
     if (newSection !== currentSection) {
       currentSection = newSection;
       if (currentSection < 6) {
         d3.select('#line-chart').style("display", "none")
         d3.select('#bias-select').style("display", "none")
+        d3.select('#cover-img').style("display", "none");
         loadDataAndChart(terms[currentSection]);
       }
     }
@@ -134,8 +147,7 @@
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (currentSection > -1){ 
-
+  if (currentSection >= 0){ 
     const x = d3.scaleBand()
       .range([0, width])
       .padding(0.1)
@@ -143,7 +155,7 @@
 
     const y = d3.scaleLinear()
       .range([height, 0])
-      .domain([0, 400]);
+      .domain([0, 450]);
 
     // Update axes
     svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
@@ -186,7 +198,7 @@
       .attr("width", x.bandwidth())
       .attr("y", y(0)) // Start from bottom
       .attr("height", 0) // Initially no height
-      .attr("fill", "steelblue")
+      .attr("fill", "#aa334f")
       .on("mouseover", (event, d) => {
           tooltip.style("visibility", "visible")
                 .text(`${d.most_serious_bias}: ${d.value}`);
@@ -235,7 +247,7 @@ function drawBar(data) {
 
   // Select the SVG, create it if it doesn't exist
   let svg = d3.select("#bar-chart").select("svg");
-  if (currentSection > -1) {
+  if (currentSection >= 0) {
     if (svg.empty()) {
       svg = d3.select("#bar-chart")
               .append("svg")
@@ -248,12 +260,14 @@ function drawBar(data) {
       // Append the g elements for axes only once
       svg.append("g").attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
+        // .attr('opacity', '0.2')
+        // .selectAll('.tick').attr("opacity", "0.2")
         .selectAll("text")
-          .attr("transform", "rotate(-65)")
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
           .attr("dy", ".15em");
 
+      // d3.select('.x-axis').selectAll(this.childNodes).attr("opacity", "0.5");
       svg.append("g").attr("class", "y-axis");
       
       svg.append("text")
@@ -261,7 +275,8 @@ function drawBar(data) {
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height + margin.bottom + 10)
-        .text("Bias Type");
+        .text("Bias Type")
+        .attr("transform", "rotate(-65)");
 
       svg.append("text")
         .attr("class", "y-axis-label")
@@ -278,6 +293,8 @@ function drawBar(data) {
         .attr("y", -margin.top / 2)
         .attr("font-size", "20px")
         .attr("font-weight", "bold")
+        .attr('width', '20%')
+        .attr('overflow-wrap', 'break-word')
         .text("Number of Hate Crime Incidents In San Francisco");
     }
 
@@ -288,7 +305,7 @@ function drawBar(data) {
 
     const y = d3.scaleLinear()
       .range([height, 0])
-      .domain([0, 400]);
+      .domain([0, 450]);
 
     // Update axes
     svg.select(".x-axis").transition().duration(500).call(d3.axisBottom(x));
@@ -424,7 +441,7 @@ const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
   svg.append("text")
     .attr("class", "y-axis-label")
     .attr("text-anchor", "middle")
-    .attr("transform", "rotate(-90)")
+    .attr("transform", "rotate(45)")
     .attr("x", -height / 2)
     .attr("y", -margin.left + 20)
     .text(`Number of ${bias} Hate Crime Victims`);
@@ -456,7 +473,7 @@ const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
     .attr("cx", d => x(d.occurence_year))
     .attr("cy", d => y(d.total_number_of_individual_victims))
     .attr("r", 5)
-    .attr("fill", "steelblue")
+    .attr("fill", "#144463")
     .on("mouseover", (event, d) => {
       tooltip.style("visibility", "visible")
         .html(`<strong>Year:</strong> ${d.occurence_year.getFullYear()}<br><strong>Total Victims:</strong> ${d.total_number_of_individual_victims}`);
@@ -472,27 +489,29 @@ const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
 }
 
 const numOverTime = () => {
-  const lineSVG = d3.select("#line-chart").select("svg")
-  if (!lineSVG.empty()) {
-    lineSVG.remove()
-  }
-  d3.csv(`${base}/victims_over_time_by_bias.csv`).then(data => {
-    const margin = { top: 30, right: 30, bottom: 30, left: 60 };
-    const width = innerWidth*0.4;
-    const height = innerHeight-200;
+  // if (currentSection >= -1){
+    const lineSVG = d3.select("#line-chart").select("svg")
+    if (!lineSVG.empty()) {
+      lineSVG.remove()
+    }
+    d3.csv(`${base}/victims_over_time_by_bias.csv`).then(data => {
+      const margin = { top: 30, right: 30, bottom: 30, left: 60 };
+      const width = innerWidth*0.4;
+      const height = innerHeight-200;
 
-    const svg = d3.select("#line-chart").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom + 20)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      const svg = d3.select("#line-chart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom + 20)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const selectedBias = document.getElementById('bias-selector').value;
-    
-    const filteredData = data.filter(d => d.most_serious_bias_type == selectedBias)
+      const selectedBias = document.getElementById('bias-selector').value;
+      
+      const filteredData = data.filter(d => d.most_serious_bias_type == selectedBias)
 
-    drawLineGraph(svg, filteredData, width, height, margin, selectedBias);
-});
+      drawLineGraph(svg, filteredData, width, height, margin, selectedBias);
+    });
+  // }
 }
 
 </script>
@@ -501,6 +520,7 @@ const numOverTime = () => {
 
 <main>
   <div class="left">
+    <img id="cover-img" src="https://images.unsplash.com/photo-1591259622709-bdb033b4be2b?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="protest">
     <div id="bias-select">
       <label for="bias-selector">Select Bias Type:</label>
       <select id="bias-selector">
@@ -517,7 +537,8 @@ const numOverTime = () => {
     <div id="bar-chart" style="position: sticky; top: 10px;"></div>
   </div>
   <div class="right">
-    <h1>Examining the Link: The Rise of Hate Crimes And Social Justice Movements In San Francisco</h1>
+    <h1><b>Examining the Link</b>: The Rise of Hate Crimes And Social Justice Movements In San Francisco</h1>
+    <p id="names">by Angela Hu, Colin Wang & Justin Lu</p>
     {#each terms as term, i}
       <section class="blurbs">
         <h2>{term}</h2>
@@ -549,11 +570,11 @@ const numOverTime = () => {
   @import '../../static/css/styles.css';
 
   .bar {
-    fill: steelblue;
+    fill: #aa334f;
   }
 
   svg {
-    background-color: #f4f4f4;
+    background-color: #f5f5f5;
     border: 1px solid #ccc;
   }
 
