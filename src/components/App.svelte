@@ -85,20 +85,21 @@
     const newSection = Math.min(terms.length, Math.floor(window.scrollY / sectionHeight) - 2);
     console.log(newSection)
     if (currentSection == -2){
-      d3.select('#line-chart').style("display", "none")
-      d3.select('#bias-select').style("display", "block")
+      d3.select('#line-chart').style("opacity", (window.scrollY / sectionHeight));
+      d3.select('#bias-select').style("opacity", (window.scrollY / sectionHeight));
       d3.select('#cover-img').style("display", "block");
       d3.select('#cover-img').style("opacity", 1-(window.scrollY / sectionHeight));
     }
     if (currentSection == -1){
       d3.select('#line-chart').style("display", "block")
-      d3.select('#bias-select').style("display", "block")
+      d3.select('#line-chart').style("opacity", (window.scrollY / sectionHeight));
+      d3.select('#bias-select').style("display", "inline")
       d3.select('#bias-select').style("opacity", (window.scrollY / sectionHeight));
       d3.select('#cover-img').style("display", "none");
     }
     if (newSection !== currentSection) {
       currentSection = newSection;
-      if (currentSection < 6) {
+      if (currentSection < 6 && currentSection > 0) {
         d3.select('#line-chart').style("display", "none")
         d3.select('#bias-select').style("display", "none")
         d3.select('#cover-img').style("display", "none");
@@ -441,7 +442,7 @@ const drawLineGraph = (svg, filteredData, width, height, margin, bias) => {
   svg.append("text")
     .attr("class", "y-axis-label")
     .attr("text-anchor", "middle")
-    .attr("transform", "rotate(45)")
+    .attr("transform", "rotate(-90)")
     .attr("x", -height / 2)
     .attr("y", -margin.left + 20)
     .text(`Number of ${bias} Hate Crime Victims`);
