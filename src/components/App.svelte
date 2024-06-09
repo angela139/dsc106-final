@@ -79,7 +79,7 @@
 
   function handleScroll() {
     const sectionHeight = window.innerHeight;
-    const newSection = Math.min(terms.length - 1, Math.floor(window.scrollY / sectionHeight) - 1);
+    const newSection = Math.min(terms.length, Math.floor(window.scrollY / sectionHeight) - 1);
     if (currentSection == -1){
       d3.select('#line-chart').style("display", "block")
       d3.select('#bias-select').style("display", "block")
