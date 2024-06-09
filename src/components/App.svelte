@@ -17,7 +17,10 @@
   ];
 
   const blurbs = [
-    '\tthis is an overview',
+    '\tIn recent years, we’ve seen a rapid rise in social justice movements and increased political polarization.\
+     As we step into another presidential term this election year, we take a look at historical trends of how past \
+     presidents\' actions may have influenced hate crimes, with San Francisco, a specifically diverse city, under \
+     the microscope.\n\tKeep scrolling to dive deeper with us.',
     '\tOn September 11, 2001, terrorists from the Islamic extremist group Al Qaeda hijacked planes and crashed \
     them into the World Trade Center Towers in New York City. Due to the terrorist attacks, almost 3,000 people \
     lost their lives. However, after these attacks, there were concerns of anti-Muslim hate in the United States. \
@@ -59,7 +62,8 @@
     '\tDuring the rise of the coronavirus pandemic, Asian Americans faced hate crimes due to the belief that they caused the pandemic, exacerbated by rhetoric from former President Donald Trump who called COVID-19 the “China Virus”. From March 2020 to March 2021, the organization Stop AAPI Hate reported that there were 6,603 hate crimes against Asian Americans, according to NPR. On May 20, 2021, President Biden signed the COVID-19 Hate Crimes Act in response to the rise of Asian American hate, which aimed to make reporting hate crimes easier.\t\n In the present day, the Palestine-Israel conflict has been gaining traction in the United States media, as people are protesting against the war. With such a contested topic, there have been many protests on either side. Unfortunately, there has been a suspected rise in religious hate crimes since the start of the war, with anti-semitic and Islamophobic crimes targeting members on both sides of the conflict.'
   ];
 
-  const images = ['', 'https://images.wsj.net/im-394615?width=1920',
+  const images = ['https://images.unsplash.com/photo-1493997575474-58d1db687da3?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  'https://images.wsj.net/im-394615?width=1920',
   'https://static01.nyt.com/images/2009/02/08/business/08stream_600.jpg?quality=75&auto=webp',
   'https://www.matthewshepard.org/wp-content/uploads/2020/04/Obama-passing-prevention-act-1.jpg',
   'https://assets.apnews.com/05/85/8194b8d0be0147eb15649784e23a/04c53adcfa5341a29da266a6aba12d66',
@@ -85,7 +89,9 @@
     const newSection = Math.min(terms.length, Math.floor(window.scrollY / sectionHeight) - 2);
     console.log(newSection)
     if (currentSection == -2){
+      d3.select('#line-chart').style("display", "block");
       d3.select('#line-chart').style("opacity", (window.scrollY / sectionHeight));
+      d3.select('#bias-select').style("display", "inline");
       d3.select('#bias-select').style("opacity", (window.scrollY / sectionHeight));
       d3.select('#cover-img').style("display", "block");
       d3.select('#cover-img').style("opacity", 1-(window.scrollY / sectionHeight));
@@ -99,10 +105,14 @@
     }
     if (newSection !== currentSection) {
       currentSection = newSection;
-      if (currentSection < 6 && currentSection > 0) {
-        d3.select('#line-chart').style("display", "none")
-        d3.select('#bias-select').style("display", "none")
-        d3.select('#cover-img').style("display", "none");
+      if (currentSection < 6) {
+        if(currentSection > 0){
+          d3.select('#cover-img').style("display", "none");
+        }
+        if(currentSection > -1){
+          d3.select('#line-chart').style("display", "none");
+          d3.select('#bias-select').style("display", "none");
+        }
         loadDataAndChart(terms[currentSection]);
       }
     }
@@ -276,8 +286,7 @@ function drawBar(data) {
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height + margin.bottom + 10)
-        .text("Bias Type")
-        .attr("transform", "rotate(-65)");
+        .text("Bias Type");
 
       svg.append("text")
         .attr("class", "y-axis-label")
@@ -522,6 +531,7 @@ const numOverTime = () => {
 <main>
   <div class="left">
     <img id="cover-img" src="https://images.unsplash.com/photo-1591259622709-bdb033b4be2b?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="protest">
+    <div id="line-chart"></div>
     <div id="bias-select">
       <label for="bias-selector">Select Bias Type:</label>
       <select id="bias-selector">
@@ -534,7 +544,6 @@ const numOverTime = () => {
         <option value="Sexual Orientation">Sexual Orientation</option>
       </select>
     </div>
-    <div id="line-chart"></div>
     <div id="bar-chart" style="position: sticky; top: 10px;"></div>
   </div>
   <div class="right">
@@ -571,7 +580,7 @@ const numOverTime = () => {
   @import '../../static/css/styles.css';
 
   .bar {
-    fill: #aa334f;
+    fill: var(--primary);
   }
 
   svg {
